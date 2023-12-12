@@ -35,3 +35,6 @@ Content-Type: application/json
 
 ### 查询某个课程的课程计划
 GET {{content_host}}/content/teachplan/74/tree-nodes
+
+### 查询某个课程的教师
+GET {{content_host}}/content/courseTeacher/list/72

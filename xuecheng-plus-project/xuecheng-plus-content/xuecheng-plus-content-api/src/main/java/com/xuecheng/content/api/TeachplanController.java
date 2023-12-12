@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,5 +31,17 @@ public class TeachplanController {
     @PostMapping("/teachplan")
     public void saveTeachplan( @RequestBody SaveTeachplanDto teachplan){
         teachplanService.saveTeachplan(teachplan);
+    }
+
+    @ApiOperation("删除课程计划")
+    @DeleteMapping("/teachplan/{teachplanId}")
+    public void deleteTeachplan(@PathVariable Long teachplanId){
+        teachplanService.deleteTeachplan(teachplanId);
+    }
+
+    @ApiOperation("移动课程计划")
+    @PostMapping("/teachplan/{moveType}/{teachplanId}")
+    public void moveTeachplan(@PathVariable String moveType,@PathVariable Long teachplanId){
+        teachplanService.moveTeachplan(moveType,teachplanId);
     }
 }
