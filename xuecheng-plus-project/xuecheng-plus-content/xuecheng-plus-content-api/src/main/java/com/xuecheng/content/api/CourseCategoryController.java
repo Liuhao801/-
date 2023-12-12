@@ -15,7 +15,6 @@ import java.util.List;
  */
 @Api(tags = "课程分类接口")
 @RestController
-@Slf4j
 public class CourseCategoryController {
 
     @Autowired

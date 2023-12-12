@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,6 +68,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
      * @param dto 课程基本信息
      * @return
      */
+    @Transactional
     public CourseBaseInfoDto createCourseBase(Long companyId, AddCourseDto dto) {
         //合法性校验
 //        if (StringUtils.isBlank(dto.getName())) {
@@ -177,11 +179,12 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     }
 
     /**
-     *
+     * 修改课程信息
      * @param companyId 教学机构id
      * @param dto 课程信息
      * @return
      */
+    @Transactional
     public CourseBaseInfoDto updateCourseBase(Long companyId, EditCourseDto dto) {
         Long courseId = dto.getId();
         CourseBase courseBase = courseBaseMapper.selectById(courseId);
