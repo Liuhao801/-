@@ -4,15 +4,19 @@ package com.xuecheng.media;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.*;
+import io.minio.errors.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilterInputStream;
+import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 测试MinIO
@@ -69,6 +73,42 @@ public class MinioTest {
         }
     }
 
+    //上传分块文件
+    @Test
+    public void test_uploadChunk() throws Exception{
+        //分块文件路径
+        File chunkFolder=new File("E:\\java\\学成在线项目—资料\\upload\\");
+        //取出分块文件
+        File[] files = chunkFolder.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            //上传文件
+            UploadObjectArgs uploadObjectArgs = UploadObjectArgs.builder()
+                    .bucket("video")  //桶
+                    .object("ABC/"+i) //桶中文件名
+                    .filename(files[i].getAbsolutePath())  //源文件
+                    .build();
+            minioClient.uploadObject(uploadObjectArgs);
+            System.out.println("上传分块成功"+i);
+        }
+    }
 
+    //调用minio接口，合并分块文件
+    @Test
+    public void test_merge() throws Exception{
+//        List<ComposeSource> sources=new ArrayList<>();
+//        for (int i = 0; i < 25; i++) {
+//            ComposeSource composeSource = ComposeSource.builder().bucket("video").object("ABC/" + i).build();
+//            sources.add(composeSource);
+//        }
+        //需要合并的文件
+        List<ComposeSource> sources = Stream.iterate(0, i -> i++).limit(25).map(i -> ComposeSource.builder().bucket("video").object("ABC/" + i).build()).collect(Collectors.toList());
+        //合并参数
+        ComposeObjectArgs composeObjectArgs= ComposeObjectArgs.builder()
+                .bucket("video")
+                .object("ABC谋杀案.mkv")
+                .sources(sources)  //需要合并的文件
+                .build();
+        minioClient.composeObject(composeObjectArgs);
+    }
 }
 

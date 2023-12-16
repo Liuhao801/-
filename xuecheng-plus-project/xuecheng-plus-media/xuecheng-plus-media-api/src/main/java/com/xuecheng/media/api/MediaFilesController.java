@@ -26,11 +26,8 @@ import java.io.IOException;
 @Api(value = "媒资文件管理接口", tags = "媒资文件管理接口")
 @RestController
 public class MediaFilesController {
-
-
     @Autowired
     MediaFileService mediaFileService;
-
 
     @ApiOperation("媒资列表查询接口")
     @PostMapping("/files")
