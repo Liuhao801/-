@@ -5,6 +5,8 @@ import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -109,6 +111,31 @@ public class MinioTest {
                 .sources(sources)  //需要合并的文件
                 .build();
         minioClient.composeObject(composeObjectArgs);
+    }
+
+    /**
+     * 清楚分块文件
+     */
+    @Test
+    public void clearChunkFiles() throws Exception{
+
+        String chunkFileFolderPath="b\\4\\b4e1dd897c4726e94f3b6f76f1822513\\chunk\\";
+        int chunkTotal=3;
+
+        List<DeleteObject> deleteObjects = Stream.iterate(0, i -> ++i)
+                .limit(chunkTotal)
+                .map(i -> new DeleteObject(chunkFileFolderPath.concat(Integer.toString(i))))
+                .collect(Collectors.toList());
+
+        Iterable<Result<DeleteError>> results = minioClient.removeObjects(
+                RemoveObjectsArgs.builder()
+                        .bucket("video")
+                        .objects(deleteObjects)
+                        .build()
+        );
+        for (Result<DeleteError> result : results) {
+            DeleteError error = result.get();
+        }
     }
 }
 
