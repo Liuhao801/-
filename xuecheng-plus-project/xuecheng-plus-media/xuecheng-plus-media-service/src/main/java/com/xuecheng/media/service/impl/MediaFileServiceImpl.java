@@ -67,7 +67,12 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Value("${minio.bucket.videofiles}")
     private String bucket_video;
 
-    @Override
+    /**
+     * 媒资文件分页查询方法
+     * @param pageParams          分页参数
+     * @param queryMediaParamsDto 查询条件
+     * @return
+     */
     public PageResult<MediaFiles> queryMediaFiels(Long companyId, PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto) {
 
         //构建查询条件对象
@@ -367,6 +372,7 @@ public class MediaFileServiceImpl implements MediaFileService {
      * @param uploadFileParamsDto 文件信息
      * @return
      */
+    @Transactional
     public RestResponse mergeChunks(Long companyId,String fileMd5,int chunkTotal,UploadFileParamsDto uploadFileParamsDto){
         //1.合并分块文件
         //分块文件路径
