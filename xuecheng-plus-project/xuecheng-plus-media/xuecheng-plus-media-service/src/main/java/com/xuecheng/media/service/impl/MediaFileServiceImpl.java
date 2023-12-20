@@ -169,6 +169,15 @@ public class MediaFileServiceImpl implements MediaFileService {
     }
 
     /**
+     * 根据媒资Id查询媒资信息
+     * @param mediaId 媒资Id
+     * @return
+     */
+    public MediaFiles getFileById(String mediaId){
+        return mediaFilesMapper.selectById(mediaId);
+    }
+
+    /**
      * 将文件信息添加到数据库
      * @param companyId  机构id
      * @param fileMd5  文件md5值

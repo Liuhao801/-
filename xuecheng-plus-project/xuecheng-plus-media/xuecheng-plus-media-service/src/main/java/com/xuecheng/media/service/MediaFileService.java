@@ -98,4 +98,11 @@ public interface MediaFileService {
      * @return void
      */
     public boolean addMediaFilesToMinIO(String localFilePath,String mimeType,String bucket, String objectName);
+
+    /**
+     * 根据媒资Id查询媒资信息
+     * @param mediaId 媒资Id
+     * @return
+     */
+    public MediaFiles getFileById(String mediaId);
 }
