@@ -4,6 +4,7 @@ import com.xuecheng.content.model.dto.CoursePreviewDto;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import com.xuecheng.content.service.CoursePublishService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ public class CourseOpenController {
     private CoursePublishService coursePublishService;
 
 
+    @ApiOperation("获取课程预览信息")
     @GetMapping("/course/whole/{courseId}")
     public CoursePreviewDto getPreviewInfo(@PathVariable("courseId") Long courseId) {
         //获取课程预览信息
