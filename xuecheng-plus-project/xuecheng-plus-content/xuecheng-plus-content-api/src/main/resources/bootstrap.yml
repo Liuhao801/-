@@ -31,6 +31,9 @@ spring:
           - data-id: freemarker-config-${spring.profiles.active}.yaml
             group: xuecheng-plus-common
             refresh: true
+          - data-id: feign-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
 #  datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 #    url: jdbc:mysql://43.137.8.13:3307/xc_content?serverTimezone=UTC&useUnicode=true&useSSL=false&characterEncoding=utf8
