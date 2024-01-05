@@ -1,5 +1,10 @@
 package com.xuecheng.content.jobHandler;
 
+import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.feignClient.CourseIndex;
+import com.xuecheng.content.feignClient.SearchServiceClient;
+import com.xuecheng.content.mapper.CoursePublishMapper;
+import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MessageProcessAbstract;
@@ -7,6 +12,7 @@ import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +24,10 @@ public class CoursePublishTask extends MessageProcessAbstract {
 
     @Autowired
     private CoursePublishService coursePublishService;
+    @Autowired
+    private CoursePublishMapper coursePublishMapper;
+    @Autowired
+    private SearchServiceClient searchServiceClient;
 
     //任务调度入口
     @XxlJob("CoursePublishJobHandler")
@@ -39,7 +49,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
         //获取课程Id
         Long courseId = Long.parseLong(mqMessage.getBusinessKey1());
         //课程静态化
-        generateCourseHtml(mqMessage,courseId);
+        //generateCourseHtml(mqMessage,courseId);
         //课程索引
         saveCourseIndex(mqMessage,courseId);
         //课程缓存
@@ -87,6 +97,13 @@ public class CoursePublishTask extends MessageProcessAbstract {
         }
 
         //保存课程索引信息
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+        CourseIndex courseIndex = new CourseIndex();
+        BeanUtils.copyProperties(coursePublish,courseIndex);
+        Boolean add = searchServiceClient.add(courseIndex);
+        if(!add){
+            XueChengPlusException.cast("添加索引失败");
+        }
 
         //保存第二阶段状态
         mqMessageService.completedStageTwo(taskId);
