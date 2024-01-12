@@ -41,9 +41,9 @@ public class MinioTest {
 //        }
 
         UploadObjectArgs testbucket = UploadObjectArgs.builder()
-                .bucket("xcbucket")
-                .object("1.jpg")//添加子目录
-                .filename("F:\\360MoveData\\Users\\HUAWEI\\Desktop\\新建文件夹\\1.jpg")
+                .bucket("mediafiles")
+                .object("course/125.html")//添加子目录
+                .filename("E:\\java\\XueCheng\\upload\\125.html")
                 .build();
         minioClient.uploadObject(testbucket);
         System.out.println("上传成功");
