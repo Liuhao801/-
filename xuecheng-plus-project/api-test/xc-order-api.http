@@ -1,0 +1,2 @@
+### 测试支付宝扫码支付
+POST {{order_host}}/orders/alipaytest2
