@@ -42,7 +42,7 @@ public class PayTestController {
         /******必传参数******/
         JSONObject bizContent = new JSONObject();
         //商户订单号，商家自定义，保持唯一性
-        bizContent.put("out_trade_no", "20210817010101004");
+        bizContent.put("out_trade_no", "20210817010101005");
         //支付金额，最小值0.01元
         bizContent.put("total_amount", 100);
         //订单标题，不可使用特殊符号
