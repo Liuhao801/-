@@ -112,6 +112,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
      * @param xcChooseCourse
      * @return
      */
+    @Transactional
     public XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse){
         //选课记录完成且未过期可以添加课程到课程表
         String status = xcChooseCourse.getStatus();
@@ -224,5 +225,34 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
             xcCourseTablesDto.setLearnStatus("702003");
             return xcCourseTablesDto;
         }
+    }
+
+    /**
+     * 保存选课信息到我的课程表
+     * @param choosecourseId
+     * @return
+     */
+    @Transactional
+    public Boolean saveChooseCourseStauts(Long choosecourseId){
+        XcChooseCourse xcChooseCourse = xcChooseCourseMapper.selectById(choosecourseId);
+        if(xcChooseCourse==null){
+            log.error("找不到选课信息,courseId:{}",choosecourseId);
+            return false;
+        }
+        //选课状态
+        String status = xcChooseCourse.getStatus();
+        //只有"未支付"的课程需要添加到我的课程表
+        if("701002".equals(status)){
+            //修改选课表状态
+            xcChooseCourse.setStatus("701001");//选课成功
+            int i = xcChooseCourseMapper.updateById(xcChooseCourse);
+            if(i<=0){
+                log.error("修改选课表状态失败,courseId:{}",choosecourseId);
+                XueChengPlusException.cast("修改选课表状态失败");
+            }
+            //将课程信息插入我的课程表
+            XcCourseTables xcCourseTables = addCourseTabls(xcChooseCourse);
+        }
+        return true;
     }
 }

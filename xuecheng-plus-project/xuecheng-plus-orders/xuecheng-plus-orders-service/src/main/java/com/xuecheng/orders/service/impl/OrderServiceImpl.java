@@ -11,7 +11,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.utils.IdWorkerUtils;
 import com.xuecheng.base.utils.QRCodeUtil;
+import com.xuecheng.messagesdk.model.po.MqMessage;
+import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xuecheng.orders.config.AlipayConfig;
+import com.xuecheng.orders.config.PayNotifyConfig;
 import com.xuecheng.orders.mapper.XcOrdersGoodsMapper;
 import com.xuecheng.orders.mapper.XcOrdersMapper;
 import com.xuecheng.orders.mapper.XcPayRecordMapper;
@@ -23,6 +26,12 @@ import com.xuecheng.orders.model.po.XcOrdersGoods;
 import com.xuecheng.orders.model.po.XcPayRecord;
 import com.xuecheng.orders.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Correlation;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageDeliveryMode;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +58,10 @@ public class OrderServiceImpl implements OrderService {
     private XcPayRecordMapper xcPayRecordMapper;
     @Autowired
     private OrderServiceImpl currentProxy;
+    @Autowired
+    private MqMessageService mqMessageService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Value("${pay.qrcodeurl}")
     String qrcodeurl;
@@ -299,7 +313,42 @@ public class OrderServiceImpl implements OrderService {
             if(i<=0){
                 XueChengPlusException.cast("保存订单信息失败");
             }
-        }
 
+            //将购买成功的课程信息写入消息mq_message表
+            //参数1：支付结果通知类型，2: 业务id，3:业务类型
+            MqMessage mqMessage = mqMessageService.addMessage("payresult_notify", xcOrders.getOutBusinessId(), xcOrders.getOrderType(), null);
+            //发送消息
+            notifyPayResult(mqMessage);
+        }
+    }
+
+    /**
+     * 发送通知结果
+     * @param message 消息体
+     */
+    public void notifyPayResult(MqMessage message){
+        //将消息转JSON
+        String jsonString = JSON.toJSONString(message);
+        //生成持久化的消息
+        Message messageObj = MessageBuilder.withBody(jsonString.getBytes(StandardCharsets.UTF_8)).setDeliveryMode(MessageDeliveryMode.PERSISTENT).build();
+        //全局唯一的消息ID，需要封装到CorrelationData中
+        CorrelationData correlationData=new CorrelationData(message.getId().toString());
+        //添加callback
+        correlationData.getFuture().addCallback(result->{
+            if(result.isAck()){
+                //ack，发送消息成功
+                log.info("发送消息成功:{}",jsonString);
+                //删除mq_message表中的消息
+                mqMessageService.completed(message.getId());
+            }else{
+                //发送消息失败
+                log.error("发送消息失败:{}",jsonString);
+            }
+        },ex->{
+            //发送消息异常
+            log.error("发送消息异常:{}",jsonString);
+        });
+        //发送消息
+        rabbitTemplate.convertAndSend(PayNotifyConfig.PAYNOTIFY_EXCHANGE_FANOUT,"",messageObj,correlationData);
     }
 }
