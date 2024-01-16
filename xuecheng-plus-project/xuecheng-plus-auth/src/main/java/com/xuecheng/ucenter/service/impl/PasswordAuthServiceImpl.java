@@ -34,18 +34,18 @@ public class PasswordAuthServiceImpl implements AuthService {
         //账号
         String username = authParamsDto.getUsername();
 
-        //远程调用验证码服务接口校验验证码
-        //输入的验证码
-        String checkcode = authParamsDto.getCheckcode();
-        //验证码在redis中的key
-        String checkcodekey = authParamsDto.getCheckcodekey();
-        if(StringUtils.isBlank(checkcode)||StringUtils.isBlank(checkcodekey)){
-            throw new RuntimeException("验证码为空");
-        }
-        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
-        if(!verify){
-            throw new RuntimeException("验证码输入错误");
-        }
+//        //远程调用验证码服务接口校验验证码
+//        //输入的验证码
+//        String checkcode = authParamsDto.getCheckcode();
+//        //验证码在redis中的key
+//        String checkcodekey = authParamsDto.getCheckcodekey();
+//        if(StringUtils.isBlank(checkcode)||StringUtils.isBlank(checkcodekey)){
+//            throw new RuntimeException("验证码为空");
+//        }
+//        Boolean verify = checkCodeClient.verify(checkcodekey, checkcode);
+//        if(!verify){
+//            throw new RuntimeException("验证码输入错误");
+//        }
 
         //从数据库中查询用户
         XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
