@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * @description TODO
+ * @description 远程调用媒资服务
  * @author Mr.M
  * @date 2022/10/27 9:04
  * @version 1.0

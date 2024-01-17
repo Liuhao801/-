@@ -1089,7 +1089,7 @@
                 
                 if(mediaFile && mediaFile.mediaId){
                     //获取视频
-                    requestGetMeidaInfo(mediaFile.mediaId,mediaFile.teachplanId,this.courseId).then(res=>{
+                    requestGetMeidaInfo(mediaFile.mediaId,mediaFile.id,this.courseId).then(res=>{
                         if(res&&res.result){
                             //console.log(res.result)
                             var newVideoObject = {

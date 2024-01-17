@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description 搜索课程结果DTO
  * @date 2022/9/25 17:51
  */
 @Data

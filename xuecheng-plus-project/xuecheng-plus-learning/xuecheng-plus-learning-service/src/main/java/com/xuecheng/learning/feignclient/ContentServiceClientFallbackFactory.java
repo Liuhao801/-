@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description ContentServiceClient熔断降级配置类
  * @date 2022/10/25 9:14
  */
 @Slf4j
@@ -17,7 +17,6 @@ public class ContentServiceClientFallbackFactory implements FallbackFactory<Cont
     @Override
     public ContentServiceClient create(Throwable throwable) {
         return new ContentServiceClient() {
-
             @Override
             public CoursePublish getCoursepublish(Long courseId) {
                 log.error("调用内容管理服务发生熔断:{}", throwable.toString(),throwable);

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description MediaServiceClient熔断降级配置类
  * @date 2022/10/27 9:05
  */
 @Slf4j

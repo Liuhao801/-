@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description mq相关配置类
  * @date 2023/2/23 16:59
  */
 @Slf4j

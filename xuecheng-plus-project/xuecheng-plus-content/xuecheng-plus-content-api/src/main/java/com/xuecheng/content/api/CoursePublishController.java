@@ -1,6 +1,9 @@
 package com.xuecheng.content.api;
 
+import com.alibaba.fastjson.JSON;
+import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.dto.TeachplanDto;
 import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
 import freemarker.template.Configuration;
@@ -8,7 +11,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -104,4 +110,28 @@ public class CoursePublishController {
 //        FileOutputStream outputStream = new FileOutputStream(file);
 //        IOUtils.copy(inputStream, outputStream);
 //    }
+
+    @ApiOperation("获取课程发布信息")
+    @ResponseBody
+    @GetMapping("/course/whole/{courseId}")
+    public CoursePreviewDto getCoursePublish(@PathVariable("courseId") Long courseId) {
+        CoursePreviewDto coursePreviewDto = new CoursePreviewDto();
+        //获取发布课程的信息
+        CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        if(coursePublish==null){
+            return coursePreviewDto;
+        }
+        //封装返回结果
+        //课程基本信息，课程营销信息
+        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+        BeanUtils.copyProperties(coursePublish,courseBaseInfoDto);
+        //课程计划信息
+        String jsonTeachplan = coursePublish.getTeachplan();
+        List<TeachplanDto> teachplanDtos = JSON.parseArray(jsonTeachplan, TeachplanDto.class);
+
+        coursePreviewDto.setCourseBase(courseBaseInfoDto);
+        coursePreviewDto.setTeachplans(teachplanDtos);
+
+        return coursePreviewDto;
+    }
 }

@@ -24,7 +24,7 @@ import java.io.OutputStream;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description 支持Multipart文件类型配置类
  * @date 2022/10/15 22:13
  */
 @Configuration

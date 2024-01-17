@@ -7,7 +7,7 @@ import lombok.ToString;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description 选课表+学习资格
  * @date 2022/10/2 16:10
  */
 @Data

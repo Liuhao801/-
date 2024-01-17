@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description feign测试类
  * @date 2023/2/22 20:14
  */
 @SpringBootTest
