@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -42,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 课程发布相关接口
@@ -66,6 +68,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     private MqMessageService mqMessageService;
     @Autowired
     private MediaServiceClient mediaServiceClient;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 获取课程预览信息
@@ -294,5 +298,72 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     public CoursePublish getCoursePublish(Long courseId){
         CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
         return coursePublish ;
+    }
+
+    /**
+     * 查询缓存中的课程信息
+     * @param courseId
+     * @return
+     */
+    //解决缓存穿透
+//    public CoursePublish getCoursePublishCache(Long courseId){
+//        //先从redis中查询数据
+//        Object jsonObj = redisTemplate.opsForValue().get("course" + courseId);
+//        if(jsonObj!=null){
+//            //直接返回数据
+//            String json = jsonObj.toString();
+//            //防止缓存穿透,对不存在的数据设置为null
+//            if(json.equals("null")){
+//                return null;
+//            }
+//            CoursePublish coursePublish = JSON.parseObject(json, CoursePublish.class);
+//            return coursePublish;
+//        }else{
+//            //若redis中没有数据，查询数据库
+//            System.out.println("从数据库查询数据...");
+//            CoursePublish coursePublish = getCoursePublish(courseId);
+////            if(coursePublish!=null){
+////                //再将结果存入redis
+////                redisTemplate.opsForValue().set("course" + courseId,JSON.toJSONString(coursePublish));
+////            }
+//            redisTemplate.opsForValue().set("course" + courseId,JSON.toJSONString(coursePublish),30, TimeUnit.SECONDS);
+//            return coursePublish;
+//        }
+//    }
+
+    //利用同步锁解决缓存击穿
+    public CoursePublish getCoursePublishCache(Long courseId){
+        //先从redis中查询数据
+        Object jsonObj = redisTemplate.opsForValue().get("course" + courseId);
+        if(jsonObj!=null){
+            //直接返回数据
+            String json = jsonObj.toString();
+            //防止缓存穿透,对不存在的数据设置为null
+            if(json.equals("null")){
+                return null;
+            }
+            CoursePublish coursePublish = JSON.parseObject(json, CoursePublish.class);
+            return coursePublish;
+        }else{
+            //若redis中没有数据，查询数据库
+            synchronized (this){
+            //再查一次缓存
+            jsonObj = redisTemplate.opsForValue().get("course" + courseId);
+            if(jsonObj!=null) {
+                //直接返回数据
+                String json = jsonObj.toString();
+                //防止缓存穿透,对不存在的数据设置为null
+                if (json.equals("null")) {
+                    return null;
+                }
+                CoursePublish coursePublish = JSON.parseObject(json, CoursePublish.class);
+                return coursePublish;
+            }
+                System.out.println("从数据库查询数据...");
+                CoursePublish coursePublish = getCoursePublish(courseId);
+                redisTemplate.opsForValue().set("course" + courseId,JSON.toJSONString(coursePublish),30, TimeUnit.SECONDS);
+                return coursePublish;
+            }
+        }
     }
 }

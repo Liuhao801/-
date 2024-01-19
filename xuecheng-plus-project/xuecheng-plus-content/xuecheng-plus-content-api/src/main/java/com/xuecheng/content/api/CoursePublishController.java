@@ -117,7 +117,7 @@ public class CoursePublishController {
     public CoursePreviewDto getCoursePublish(@PathVariable("courseId") Long courseId) {
         CoursePreviewDto coursePreviewDto = new CoursePreviewDto();
         //获取发布课程的信息
-        CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        CoursePublish coursePublish = coursePublishService.getCoursePublishCache(courseId);
         if(coursePublish==null){
             return coursePreviewDto;
         }
